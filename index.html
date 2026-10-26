@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Doc Highlighter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true"></span>Doc Highlighter</div>
+    <div class="status" id="status">Upload a PDF or image to start.</div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <section class="step">
+        <h2><span class="num">1</span>Document</h2>
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="application/pdf,image/*" hidden>
+          <strong id="dropTitle">Drop a PDF or image</strong>
+          <span id="dropSub">or click to choose a file</span>
+        </label>
+        <div class="row" id="pageRow" hidden>
+          <label class="inline">Page <input type="number" id="pageNum" min="1" value="1"> <span id="pageCount"></span></label>
+        </div>
+        <label class="check"><input type="checkbox" id="forceOcr"> Treat PDF as a scan (use OCR)</label>
+      </section>
+
+      <section class="step">
+        <h2><span class="num">2</span>Words to highlight</h2>
+        <textarea id="phrases" rows="4" placeholder="One word or phrase per line"></textarea>
+        <div class="row between">
+          <label class="check"><input type="checkbox" id="firstOnly"> First match only</label>
+          <button id="findBtn" class="btn">Find</button>
+        </div>
+        <ul id="matchList" class="matches"></ul>
+        <p class="hint">Missed one? In <b>Edit</b> view, drag across the words on the page to add a highlight. Click a highlight to select it, then drag its blue end handle (or press ← →, with Shift for bigger steps) to fix where it stops. Delete removes it.</p>
+        <ul id="barList" class="bars"></ul>
+      </section>
+
+      <section class="step">
+        <h2><span class="num">3</span>Marker</h2>
+        <div class="swatches" id="swatches">
+          <label class="custom" title="Custom color"><input type="color" id="color" value="#88c9d7"></label>
+          <input type="text" class="hex" id="colorHex" value="#88c9d7" maxlength="7" spellcheck="false" aria-label="Marker color hex code">
+        </div>
+        <label class="slider">Opacity <output for="opacity"></output>
+          <input type="range" id="opacity" min="0.1" max="1" step="0.05" value="0.75" data-fmt="pct"></label>
+        <label class="field">Blend mode
+          <select id="blend">
+            <option value="auto">Auto</option>
+            <option value="multiply">Multiply (for light pages)</option>
+            <option value="screen">Screen (for dark pages)</option>
+            <option value="normal">Normal</option>
+          </select></label>
+      </section>
+
+      <section class="step">
+        <h2><span class="num">4</span>Timing</h2>
+        <label class="slider">Wait before first swipe <output for="leadIn"></output>
+          <input type="range" id="leadIn" min="0" max="3" step="0.05" value="0.2" data-fmt="s"></label>
+        <label class="slider">Swipe length <output for="swipe"></output>
+          <input type="range" id="swipe" min="0.2" max="8" step="0.05" value="0.6" data-fmt="s"></label>
+        <label class="check"><input type="checkbox" id="scaleLen"> Longer phrases take longer to swipe</label>
+        <p class="hint tight-top" id="swipeHint" hidden>Swipe length is for a phrase of about 80 characters; others scale from there.</p>
+        <label class="slider">Gap between highlights <output for="gap"></output>
+          <input type="range" id="gap" min="-2" max="3" step="0.05" value="0.2" data-fmt="s"></label>
+        <p class="hint tight-top">Counted from when a swipe visibly lands. Below 0, swipes overlap in a stagger.</p>
+        <label class="slider">Hold at end <output for="hold"></output>
+          <input type="range" id="hold" min="0" max="10" step="0.25" value="2" data-fmt="s"></label>
+        <label class="field">Highlight motion
+          <select id="posterize">
+            <option value="0">Smooth</option>
+            <option value="12" selected>Posterize to 12 fps</option>
+            <option value="8">Posterize to 8 fps</option>
+          </select></label>
+        <label class="field">Order
+          <select id="order">
+            <option value="reading">Top to bottom on the page</option>
+            <option value="typed">Order I typed them</option>
+          </select></label>
+      </section>
+
+      <section class="step">
+        <h2><span class="num">5</span>Video</h2>
+        <div class="grid2">
+          <label class="field">Size
+            <select id="aspect">
+              <option value="1920x1920" selected>1:1 · 1920×1920</option>
+              <option value="1920x1080">16:9 · 1920×1080</option>
+              <option value="3840x2160">16:9 · 3840×2160</option>
+              <option value="1080x1920">9:16 · 1080×1920</option>
+            </select></label>
+          <label class="field">Frame rate
+            <select id="fps">
+              <option>12</option><option selected>24</option><option>25</option><option>30</option><option>60</option>
+            </select></label>
+          <label class="field">Framing
+            <select id="framing">
+              <option value="zoom">Zoom to highlights</option>
+              <option value="page">Whole page</option>
+            </select></label>
+          <label class="field">Background
+            <span class="colorrow">
+              <input type="color" id="bg" value="#ffffff">
+              <input type="text" class="hex" id="bgHex" value="#ffffff" maxlength="7" spellcheck="false" aria-label="Background color hex code">
+            </span></label>
+        </div>
+        <label class="slider">Zoom <output for="zoom"></output>
+          <input type="range" id="zoom" min="0.5" max="3" step="0.05" value="1" data-fmt="pct"></label>
+        <div class="grid3">
+          <label class="field">Position X <input type="number" id="posX" step="1"></label>
+          <label class="field">Position Y <input type="number" id="posY" step="1"></label>
+          <label class="field">Scale % <input type="number" id="posScale" step="0.1" min="1"></label>
+        </div>
+        <div class="row between">
+          <span class="hint tight">Drag the Preview to reposition. Numbers match the Page layer in After Effects.</span>
+          <button id="resetFraming" class="btn small">Reset</button>
+        </div>
+      </section>
+
+      <section class="step export">
+        <button id="exportMp4" class="btn primary" disabled>Export MP4</button>
+        <button id="exportXml" class="btn" disabled>Export for Premiere (.zip)</button>
+        <button id="exportAe" class="btn" disabled>Export for After Effects (.zip)</button>
+        <div class="progress" id="progress" hidden><div id="progressBar"></div></div>
+        <p class="hint">Both packages keep the page and each highlight as separate layers with keyframes you can retime. The After Effects script builds a comp with native shape layers and the same ease-out as the preview.</p>
+      </section>
+    </aside>
+
+    <section class="stage-wrap">
+      <div class="stage-tabs" role="tablist">
+        <button class="tab active" data-mode="edit" role="tab">Edit</button>
+        <button class="tab" data-mode="preview" role="tab">Preview</button>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <div class="empty" id="empty">Your document will appear here.</div>
+      </div>
+      <div class="transport" id="transport" hidden>
+        <button id="playBtn" class="btn small">Play</button>
+        <input type="range" id="scrub" min="0" max="1" step="0.001" value="0">
+        <span id="timeLabel" class="time">0.0s / 0.0s</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
