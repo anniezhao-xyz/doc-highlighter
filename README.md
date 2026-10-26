@@ -18,6 +18,8 @@ To change the preset marker colors, edit `SWATCHES` at the top of `app.js`.
 
 ## Running it
 
+**Live app: https://anniezhao-xyz.github.io/doc-highlighter/** (use Chrome, Edge or Safari).
+
 Everything runs in the browser and no files are uploaded anywhere. To run it locally, serve it over http rather than opening it as a file, because it loads libraries:
 
 ```bash
